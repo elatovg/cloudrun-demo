@@ -158,21 +158,47 @@ Hello World, my name is flask and I am running on cloud run
 There are already some nice instructions in [Deploying to Cloud Run](https://cloud.google.com/cloud-build/docs/deploying-builds/deploy-cloud-run). I ended up creating a `cloudbuild.yaml` which builds and updates the deployment triggered by a push to a repository. For example if I made this change:
 
 ```bash
-git diff
+> git diff
+diff --git a/app/app.py b/app/app.py
+index 53b0cf4..5e4d9ad 100644
+--- a/app/app.py
++++ b/app/app.py
+@@ -19,7 +19,7 @@ def get_status():
+ def hello_world():
+     target = os.environ.get('TARGET', 'World')
+     platform = os.environ.get('K_SERVICE', 'My_App')
+-    return 'Hello {}, my name is {} and I am running on cloud run\n'.format(target,platform)
++    return 'Hello {}, My name is {} and I love running on cloud run\n'.format(target,platform)
+
+ if __name__ == "__main__":
+     app.run(debug=True,host='0.0.0.0',port=int(os.environ.get('PORT', 8080)))
 ```
 
 and pushed (don't forget to configure the [Required IAM permissions](https://cloud.google.com/cloud-build/docs/deploying-builds/deploy-cloud-run#required_iam_permissions)):
 
 ```bash
-git push
+> git push
 ```
 
 I would see a build kicked off and I could also check out the logs of the build:
 
 ```bash
+> gcloud builds log $(gcloud builds list --limit 1 --format "value(id)") | grep -E "Starting|Finished"
+Starting Step #0 - "Pull-docker-image"
+Finished Step #0 - "Pull-docker-image"
+Starting Step #1 - "Build-Docker-Image"
+Finished Step #1 - "Build-Docker-Image"
+Starting Step #2 - "Push-the-Docker-Image-to-GCR"
+Finished Step #2 - "Push-the-Docker-Image-to-GCR"
+Starting Step #3 - "Update-Cloud-Run"
+Finished Step #3 - "Update-Cloud-Run"
 ```
 
 And after the build is finished I can confirm the new version is deployed:
 
 ```bash
+> gcloud run services list --platform managed --format value'(status.address.url)'
+https://flask-iog62mnhaa-uk.a.run.app
+> curl https://flask-iog62mnhaa-uk.a.run.app
+Hello World, My name is flask and I love running on cloud run
 ```
