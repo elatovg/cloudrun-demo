@@ -19,7 +19,7 @@ def get_status():
 def hello_world():
     target = os.environ.get('TARGET', 'World')
     platform = os.environ.get('K_SERVICE', 'My_App')
-    return 'Hello {}, My name is {} and I am running on cloud run\n'.format(target,platform)
+    return 'Hello {}, My name is {} and I love running on cloud run\n'.format(target,platform)
 
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0',port=int(os.environ.get('PORT', 8080)))

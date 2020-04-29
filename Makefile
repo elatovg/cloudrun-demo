@@ -15,16 +15,17 @@
 # Make will use bash instead of sh
 SHELL := /usr/bin/env bash
 PROJECT_ID := $(shell gcloud config list --format "value(core.project)")
-IMAGE_NAME := gcr.io/${PROJECT_ID}/flask:cloudrun-latest
+IMAGE_NAME := gcr.io/${PROJECT_ID}/flask
+TAG:= cloudrun-latest
 SVC_NAME := flask
 REG := us-east4
 
 build-container:
-	cd app && gcloud builds submit --tag ${IMAGE_NAME} && echo -e "======="
-	gcloud container images list-tags ${IMAGE_NAME} && echo -e "======="
+	cd app && gcloud builds submit --tag ${IMAGE_NAME}:${TAG} && echo -e "======="
+	gcloud container images list-tags ${IMAGE_NAME} --filter ${TAG} && echo -e "======="
 
 deploy-app:
-	gcloud beta run deploy ${SVC_NAME} --image ${IMAGE_NAME} \
+	gcloud beta run deploy ${SVC_NAME} --image ${IMAGE_NAME}:${TAG} \
 	--platform managed --region ${REG} --allow-unauthenticated \
 	&& echo -e "======="
 
