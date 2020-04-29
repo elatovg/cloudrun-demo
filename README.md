@@ -161,7 +161,7 @@ There are already some nice instructions in [Deploying to Cloud Run](https://clo
 git diff
 ```
 
-and pushed:
+and pushed (don't forget to configure the [Required IAM permissions](https://cloud.google.com/cloud-build/docs/deploying-builds/deploy-cloud-run#required_iam_permissions)):
 
 ```bash
 git push
