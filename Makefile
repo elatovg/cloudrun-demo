@@ -15,25 +15,25 @@
 # Make will use bash instead of sh
 SHELL := /usr/bin/env bash
 PROJECT_ID := $(shell gcloud config list --format "value(core.project)")
-IMAGE_NAME := gcr.io/${PROJECT_ID}/cloudrun
-SVC_NAME := cloudrun
-REG := us-east1
+IMAGE_NAME := gcr.io/${PROJECT_ID}/flask:cloudrun-latest
+SVC_NAME := flask
+REG := us-east4
 
 build-container:
-	gcloud config configurations activate ${PROJECT_ID}
 	cd app && gcloud builds submit --tag ${IMAGE_NAME} && echo -e "======="
 	gcloud container images list-tags ${IMAGE_NAME} && echo -e "======="
 
 deploy-app:
-	gcloud config configurations activate ${PROJECT_ID}
-	gcloud beta run deploy ${SVC_NAME} --image ${IMAGE_NAME} --platform managed --region ${REG} --allow-unauthenticated && echo -e "======="
+	gcloud beta run deploy ${SVC_NAME} --image ${IMAGE_NAME} \
+	--platform managed --region ${REG} --allow-unauthenticated \
+	&& echo -e "======="
 
-URL := $(shell gcloud beta run services list --platform managed --format value'(status.address.hostname)')
+URL := $(shell gcloud run services list --platform managed --format value'(status.address.url)')
 
 generate-load:
 	for i in $$(seq 1 100); do echo $$i; curl ${URL} ; done
-	echo "visit https://console.cloud.google.com/run/detail/us-east1/${SVC_NAME}/metrics?project=${PROJECT_ID}"
+	echo "visit https://console.cloud.google.com/run/detail/${REG}/${SVC_NAME}/metrics?project=${PROJECT_ID}"
 
 cleanup:
 	gcloud container images delete ${IMAGE_NAME} --force-delete-tags --quiet
-	gcloud beta run services delete --platform managed ${SVC_NAME} --region ${REG} -q
+	gcloud run services delete --platform managed ${SVC_NAME} --region ${REG} -q
